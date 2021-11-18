@@ -1,0 +1,37 @@
+# This is a basic workflow to help you get started with Actions
+
+name: release
+
+# Controls when the workflow will run
+on:
+  # Triggers the workflow on push or pull request events but only for the main branch
+  push:
+    branches: [ master ]
+    
+jobs:
+  build:
+    name: Upload Release Asset
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Create output var
+        id: output_var
+        run: |
+          echo "::set-output name=tag_name::$(TZ=UTC+8 date +%Y.%m.%d.%s)"
+          find . -type d -maxdepth 1 \
+            | while read dir; do
+              [ -z "$(echo "${dir}" | sed 's/\.//g')" ] || zip -r "${dir}.zip" "${dir}"
+            done
+          echo '-------------------'
+          find . -type f -maxdepth 1
+          echo '-------------------'
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ steps.output_var.outputs.tag_name }}
+          files: |
+            *
+            .*
