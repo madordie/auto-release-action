@@ -23,6 +23,7 @@ jobs:
             | while read dir; do
               [ -z "$(echo "${dir}" | sed 's/\.//g')" ] || zip -r "${dir}.zip" "${dir}"
             done
+          find . -type f -size -1c -delete
           echo '-------------------'
           find . -type f -maxdepth 1
           echo '-------------------'
